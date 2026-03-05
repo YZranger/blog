@@ -1,20 +1,26 @@
-// GitHub Issues API 服务（只读）
+// GitHub Issues API 服务
 // 用于从 GitHub Issues 获取文章和评论
 
 const REPO_OWNER = 'YZranger'
 const REPO_NAME = 'blog'
+
+const getHeaders = (token = null) => {
+  const headers = {
+    'Accept': 'application/vnd.github.v3+json',
+    'User-Agent': 'yz-blog'
+  }
+  if (token) {
+    headers['Authorization'] = `token ${token}`
+  }
+  return headers
+}
 
 // 获取所有文章（标签为 article 的 issues）
 export async function getPosts() {
   try {
     const response = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues?labels=article&state=open&per_page=100`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'yz-blog'
-        }
-      }
+      { headers: getHeaders() }
     )
     
     if (!response.ok) throw new Error('Failed to fetch posts')
@@ -41,27 +47,16 @@ export async function getPost(postId) {
   try {
     const issueResponse = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${postId}`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'yz-blog'
-        }
-      }
+      { headers: getHeaders() }
     )
     
     if (!issueResponse.ok) throw new Error('Failed to fetch post')
     
     const issue = await issueResponse.json()
     
-    // 获取评论
     const commentsResponse = await fetch(
       `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${postId}/comments?per_page=100`,
-      {
-        headers: {
-          'Accept': 'application/vnd.github.v3+json',
-          'User-Agent': 'yz-blog'
-        }
-      }
+      { headers: getHeaders() }
     )
     
     const comments = commentsResponse.ok ? await commentsResponse.json() : []
@@ -83,5 +78,79 @@ export async function getPost(postId) {
   } catch (error) {
     console.error('Error fetching post:', error)
     return null
+  }
+}
+
+// 验证管理员（通过 GitHub API）
+export async function verifyAdmin(token) {
+  try {
+    const response = await fetch('https://api.github.com/user', {
+      headers: getHeaders(token)
+    })
+    
+    if (!response.ok) return { valid: false, error: 'Invalid token' }
+    
+    const user = await response.json()
+    const allowedUsers = ['YZranger']
+    
+    return { 
+      valid: allowedUsers.includes(user.login),
+      username: user.login
+    }
+  } catch (error) {
+    return { valid: false, error: error.message }
+  }
+}
+
+// 创建文章
+export async function createPost(title, content, tags = [], token) {
+  try {
+    const labels = ['article', ...tags].join(',')
+    
+    const response = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`,
+      {
+        method: 'POST',
+        headers: getHeaders(token),
+        body: JSON.stringify({ title, body: content, labels })
+      }
+    )
+    
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to create post')
+    }
+    
+    const issue = await response.json()
+    return { success: true, id: issue.number.toString() }
+  } catch (error) {
+    console.error('Error creating post:', error)
+    return { success: false, error: error.message }
+  }
+}
+
+// 添加评论
+export async function addComment(postId, name, content, token) {
+  try {
+    const body = `**${name}**:\n\n${content}`
+    
+    const response = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues/${postId}/comments`,
+      {
+        method: 'POST',
+        headers: getHeaders(token),
+        body: JSON.stringify({ body })
+      }
+    )
+    
+    if (!response.ok) {
+      const error = await response.json()
+      throw new Error(error.message || 'Failed to add comment')
+    }
+    
+    return { success: true }
+  } catch (error) {
+    console.error('Error adding comment:', error)
+    return { success: false, error: error.message }
   }
 }

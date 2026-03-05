@@ -23,7 +23,7 @@ onMounted(() => {
       </div>
       <nav class="nav">
         <RouterLink to="/" class="nav-link">Home</RouterLink>
-        <RouterLink to="/blog" class="nav-link">Blog</RouterLink>
+        <RouterLink to="/admin" class="nav-link">Admin</RouterLink>
       </nav>
     </header>
     
