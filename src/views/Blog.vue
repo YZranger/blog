@@ -103,7 +103,7 @@ const goToPost = (id) => {
   background: transparent;
   border: none;
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: inherit;
   font-size: 1rem;
   outline: none;
 }
@@ -143,13 +143,7 @@ const goToPost = (id) => {
   box-shadow: 0 10px 30px rgba(0, 255, 65, 0.15);
 }
 
-.post-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
+.post-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 .post-date { color: var(--text-dim); font-size: 0.85rem; }
 .post-tags { display: flex; gap: 0.5rem; }
 .tag { color: #ff0055; font-size: 0.8rem; }

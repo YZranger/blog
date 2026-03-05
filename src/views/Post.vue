@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getPost, addComment, verifyAdmin } from '../services/github.js'
+import { getPost } from '../services/github.js'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 
@@ -11,29 +11,13 @@ const router = useRouter()
 const post = ref(null)
 const loading = ref(true)
 
-// Auth state
-const isAuthenticated = ref(false)
-const username = ref('')
-const token = ref('')
-
-// Comment form
+// Comment form (no login required)
 const newComment = ref({ name: '', content: '' })
 const showCommentForm = ref(false)
 const commentSubmitting = ref(false)
 const commentSuccess = ref(false)
 
-const checkAuth = () => {
-  const savedToken = localStorage.getItem('github_token')
-  const savedUsername = localStorage.getItem('github_username')
-  if (savedToken && savedUsername) {
-    token.value = savedToken
-    username.value = savedUsername
-    isAuthenticated.value = true
-  }
-}
-
 onMounted(async () => {
-  checkAuth()
   post.value = await getPost(route.params.id)
   loading.value = false
   
@@ -44,49 +28,30 @@ onMounted(async () => {
   }, 100)
 })
 
-const goBack = () => router.push('/')
+const goBack = () => router.push('/blog')
 
 // 判断评论是否是作者
 const isAuthor = (commentName) => {
   return post.value && commentName === post.value.author
 }
 
-// 获取 GitHub 评论链接
-const getGitHubCommentLink = (commentId) => {
-  return `https://github.com/YZranger/blog/issues/${route.params.id}#issuecomment-${commentId}`
-}
-
+// 提交评论（使用 GitHub Discussions API 或直接跳转到 GitHub）
+// 由于评论需要认证，这里提供跳转方式
 const submitComment = async () => {
   if (!newComment.value.name || !newComment.value.content) return
   
-  const commentToken = token.value || localStorage.getItem('github_token')
-  if (!commentToken) {
-    alert('请先在 /admin 登录 GitHub Token')
-    router.push('/admin')
-    return
-  }
+  // 直接跳转到 GitHub Issue 页面评论
+  window.open(`https://github.com/YZranger/blog/issues/${route.params.id}`, '_blank')
   
-  commentSubmitting.value = true
-  
-  const result = await addComment(
-    route.params.id,
-    newComment.value.name,
-    newComment.value.content,
-    commentToken
-  )
-  
-  commentSubmitting.value = false
-  
-  if (result.success) {
-    commentSuccess.value = true
-    newComment.value = { name: '', content: '' }
-    showCommentForm.value = false
-    // 刷新评论
-    post.value = await getPost(route.params.id)
-    setTimeout(() => commentSuccess.value = false, 2000)
-  } else {
-    alert('评论失败: ' + result.error)
-  }
+  // 清空表单
+  newComment.value = { name: '', content: '' }
+  showCommentForm.value = false
+  commentSuccess.value = true
+  setTimeout(() => commentSuccess.value = false, 3000)
+}
+
+const getGitHubCommentLink = (commentId) => {
+  return `https://github.com/YZranger/blog/issues/${route.params.id}#issuecomment-${commentId}`
 }
 
 const renderContent = (content) => {
@@ -186,21 +151,11 @@ const renderContent = (content) => {
       <div v-if="showCommentForm" class="comment-form">
         <div class="form-group">
           <label>> 你的名字:</label>
-          <input 
-            v-model="newComment.name" 
-            type="text" 
-            placeholder="Name..."
-            class="form-input"
-          />
+          <input v-model="newComment.name" type="text" placeholder="Name..." class="form-input" />
         </div>
         <div class="form-group">
           <label>> 评论内容:</label>
-          <textarea 
-            v-model="newComment.content" 
-            placeholder="Your message..."
-            rows="4"
-            class="form-textarea"
-          ></textarea>
+          <textarea v-model="newComment.content" placeholder="Your message..." rows="4" class="form-textarea"></textarea>
         </div>
         <div class="form-actions">
           <button @click="submitComment" :disabled="commentSubmitting" class="submit-btn">
@@ -211,15 +166,10 @@ const renderContent = (content) => {
       </div>
 
       <div v-if="commentSuccess" class="success-msg">
-        ✓ 评论提交成功！
+        ✓ 已跳转到 GitHub 评论，请在那里提交评论
       </div>
 
-      <!-- Add Comment Button -->
-      <button 
-        v-if="!showCommentForm" 
-        @click="showCommentForm = true" 
-        class="add-comment-btn"
-      >
+      <button v-if="!showCommentForm" @click="showCommentForm = true" class="add-comment-btn">
         + 添加评论
       </button>
     </section>
@@ -232,37 +182,18 @@ const renderContent = (content) => {
   <div v-else class="not-found">
     <h1>404</h1>
     <p>> 文章未找到</p>
-    <button @click="goBack">返回首页</button>
+    <button @click="goBack">返回博客</button>
   </div>
 </template>
 
 <style scoped>
 .post-page { max-width: 800px; margin: 0 auto; }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.9rem;
-  padding: 0.5rem 0;
-  margin-bottom: 1.5rem;
-  transition: color 0.3s;
-}
+.back-btn { display: flex; align-items: center; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; font-family: inherit; font-size: 0.9rem; padding: 0.5rem 0; margin-bottom: 1.5rem; transition: color 0.3s; }
 .back-btn:hover { color: var(--accent); }
 .back-text { margin-left: 0.5rem; }
 
-.post {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-}
-
+.post { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
 .post-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
 .post-meta { font-size: 0.9rem; margin-bottom: 0.8rem; }
 .sep { margin: 0 0.5rem; color: var(--text-dim); }
@@ -283,51 +214,20 @@ const renderContent = (content) => {
 .post-content :deep(a) { color: var(--accent); text-decoration: underline; }
 .post-content :deep(.mention) { color: #58a6ff; }
 
-.comments-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
+.comments-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; }
 .comments-title { font-size: 1.2rem; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 .comment-icon { color: var(--accent); }
 
 .comments-list { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; }
 
-.comment {
-  background: var(--bg-secondary);
-  padding: 1rem;
-  border-radius: 6px;
-  border-left: 3px solid var(--border);
-  transition: all 0.3s;
-}
+.comment { background: var(--bg-secondary); padding: 1rem; border-radius: 6px; border-left: 3px solid var(--border); transition: all 0.3s; }
+.comment.is-author { border-left-color: var(--accent); background: rgba(0, 255, 65, 0.05); }
 
-.comment.is-author {
-  border-left-color: var(--accent);
-  background: rgba(0, 255, 65, 0.05);
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.85rem;
-  margin-bottom: 0.5rem;
-}
-
+.comment-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 0.5rem; }
 .comment-author { display: flex; align-items: center; gap: 0.5rem; }
 .comment-name { color: var(--accent); font-weight: 500; }
 
-.author-badge {
-  background: var(--accent);
-  color: var(--bg-primary);
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
+.author-badge { background: var(--accent); color: var(--bg-primary); padding: 0.1rem 0.4rem; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
 .comment-date { color: var(--text-dim); }
 .comment-content { color: var(--text-secondary); line-height: 1.6; }
 
@@ -338,69 +238,23 @@ const renderContent = (content) => {
 .no-comments { text-align: center; padding: 2rem; color: var(--text-dim); }
 .hint { margin-top: 0.5rem; }
 
-/* Comment Form */
-.comment-form {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background: var(--bg-secondary);
-  border-radius: 6px;
-  border: 1px solid var(--border);
-}
-
+.comment-form { margin-bottom: 1rem; padding: 1rem; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border); }
 .form-group { margin-bottom: 1rem; }
 .form-group label { display: block; color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem; }
-
-.form-input, .form-textarea {
-  width: 100%;
-  padding: 0.8rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
+.form-input, .form-textarea { width: 100%; padding: 0.8rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--text-primary); font-family: inherit; font-size: 0.95rem; }
 .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
 .form-textarea { resize: vertical; }
-
 .form-actions { display: flex; gap: 1rem; }
 
-.submit-btn, .cancel-btn {
-  padding: 0.8rem 1.5rem;
-  border-radius: 6px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
+.submit-btn, .cancel-btn { padding: 0.8rem 1.5rem; border-radius: 6px; font-family: inherit; cursor: pointer; transition: all 0.3s; }
 .submit-btn { background: var(--accent); color: var(--bg-primary); border: none; font-weight: 600; }
 .submit-btn:hover { background: var(--accent-hover); }
-.submit-btn:disabled { opacity: 0.5; }
-
 .cancel-btn { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
 .cancel-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
 
-.success-msg {
-  background: rgba(0, 255, 65, 0.1);
-  color: var(--accent);
-  padding: 0.8rem;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  text-align: center;
-}
+.success-msg { background: rgba(0, 255, 65, 0.1); color: var(--accent); padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; }
 
-.add-comment-btn {
-  width: 100%;
-  padding: 1rem;
-  background: transparent;
-  border: 1px dashed var(--border);
-  color: var(--text-secondary);
-  font-family: inherit;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.3s;
-}
+.add-comment-btn { width: 100%; padding: 1rem; background: transparent; border: 1px dashed var(--border); color: var(--text-secondary); font-family: inherit; cursor: pointer; border-radius: 6px; transition: all 0.3s; }
 .add-comment-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 .loading { text-align: center; padding: 4rem; color: var(--text-primary); }

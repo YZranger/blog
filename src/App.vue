@@ -23,7 +23,7 @@ onMounted(() => {
       </div>
       <nav class="nav">
         <RouterLink to="/" class="nav-link">Home</RouterLink>
-        <RouterLink to="/admin" class="nav-link">Admin</RouterLink>
+        <RouterLink to="/blog" class="nav-link">Blog</RouterLink>
       </nav>
     </header>
     
@@ -61,11 +61,7 @@ onMounted(() => {
   --border: #00ff4133;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   background: var(--bg-primary);
@@ -78,28 +74,16 @@ body {
 body::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: 
     linear-gradient(180deg, transparent 0%, var(--bg-primary) 100%),
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 255, 65, 0.03) 2px,
-      rgba(0, 255, 65, 0.03) 4px
-    );
+    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 65, 0.03) 2px, rgba(0, 255, 65, 0.03) 4px);
   pointer-events: none;
   z-index: -1;
 }
 
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+.app { min-height: 100vh; display: flex; flex-direction: column; }
 
 .header {
   display: flex;
@@ -114,37 +98,17 @@ body::before {
   z-index: 100;
 }
 
-.logo {
-  font-size: 1.5rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-}
-
+.logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; }
 .bracket { color: var(--text-dim); }
 .yz { color: var(--text-primary); text-shadow: 0 0 10px var(--text-primary); }
 .slash { color: #ff0055; }
 
-.cursor {
-  opacity: 0;
-  color: var(--accent);
-  margin-left: 2px;
-}
+.cursor { opacity: 0; color: var(--accent); margin-left: 2px; }
+.cursor.visible { opacity: 1; animation: blink 0.5s infinite; }
 
-.cursor.visible {
-  opacity: 1;
-  animation: blink 0.5s infinite;
-}
+@keyframes blink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-.nav {
-  display: flex;
-  gap: 1.5rem;
-}
+.nav { display: flex; gap: 1.5rem; }
 
 .nav-link {
   color: var(--text-secondary);
@@ -154,25 +118,10 @@ body::before {
   position: relative;
 }
 
-.nav-link::before {
-  content: '// ';
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.nav-link:hover {
-  color: var(--accent);
-  text-shadow: 0 0 10px var(--accent);
-}
-
-.nav-link:hover::before {
-  opacity: 1;
-}
-
-.nav-link.router-link-active {
-  color: var(--accent);
-}
-
+.nav-link::before { content: '// '; opacity: 0; transition: opacity 0.3s; }
+.nav-link:hover { color: var(--accent); text-shadow: 0 0 10px var(--accent); }
+.nav-link:hover::before { opacity: 1; }
+.nav-link.router-link-active { color: var(--accent); }
 .nav-link.router-link-active::after {
   content: '';
   position: absolute;
@@ -184,13 +133,7 @@ body::before {
   box-shadow: 0 0 10px var(--accent);
 }
 
-.main {
-  flex: 1;
-  padding: 1.5rem;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-}
+.main { flex: 1; padding: 1.5rem; max-width: 1200px; width: 100%; margin: 0 auto; }
 
 .footer {
   padding: 1.5rem;
@@ -200,48 +143,18 @@ body::before {
   font-size: 0.85rem;
 }
 
-.footer p {
-  margin: 0.3rem 0;
-}
+.footer p { margin: 0.3rem 0; }
+.emoji { font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif; }
+.typing { color: #ff0055; }
 
-.emoji {
-  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
-}
-
-.typing {
-  color: #ff0055;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--text-dim);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--text-primary);
-}
-
-::selection {
-  background: var(--accent);
-  color: var(--bg-primary);
-}
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb { background: var(--text-dim); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-primary); }
+::selection { background: var(--accent); color: var(--bg-primary); }
 
 @media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .nav {
-    gap: 1rem;
-  }
+  .header { flex-direction: column; gap: 1rem; }
+  .nav { gap: 1rem; }
 }
 </style>
