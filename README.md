@@ -11,7 +11,7 @@
 - ⚡ **极速体验** - 基于 Vite + Vue 3 + Tailwind CSS
 - 📱 **响应式** - 完美支持移动端
 - 🔐 **GitHub Issues 后端** - 文章存储在 GitHub
-- 💬 **评论区** - 访客可留言互动
+- 💬 **评论区** - 通过 GitHub 互动，作者标识
 - 🎨 **代码高亮** - 支持多种编程语言
 
 ---
@@ -27,7 +27,7 @@
 
 ## 📝 如何写文章
 
-### 方法一：在 GitHub 上创建 Issue（推荐）
+### 在 GitHub 上创建 Issue
 
 1. 打开 https://github.com/YZranger/blog/issues/new
 2. 填写文章标题
@@ -36,11 +36,30 @@
 5. 可添加其他标签如 `javascript`, `vue`, `tutorial` 等
 6. 点击 Submit
 
-### 方法二：直接在博客页面点击快捷链接
+### 快捷入口
 
 首页有两个快捷按钮：
 - **GitHub** - 查看源码
 - **Write Post** - 快速创建新文章
+
+---
+
+## 💬 发表评论与回复
+
+### 发表评论
+
+1. 打开任意文章
+2. 点击底部「在 GitHub 上评论」按钮
+3. 在 GitHub Issue 页面填写评论
+4. 点击 Comment 提交
+
+### 回复他人评论
+
+在评论中使用 `@用户名` 提及对方，即可实现回复效果。
+
+### 作者标识
+
+当评论者与文章作者是同一人时，会显示「作者」标识，便于区分。
 
 ---
 
@@ -65,14 +84,7 @@ function hello() {
 - 项目 2
 
 > 这是一段引用
-
----
-
-## 💬 发表评论
-
-1. 打开任意文章
-2. 在底部填写名字和留言
-3. 点击 Submit
+```
 
 ---
 
@@ -97,14 +109,14 @@ blog/
 ├── src/
 │   ├── views/
 │   │   ├── Home.vue    # 首页（炫酷动画）
-│   │   ├── Blog.vue    # 文章列表
-│   │   └── Post.vue    # 文章详情
+│   │   ├── Blog.vue   # 文章列表
+│   │   └── Post.vue   # 文章详情 + 评论
 │   ├── services/
-│   │   └── github.js   # GitHub Issues API
+│   │   └── github.js  # GitHub Issues API
 │   ├── router/
-│   │   └── index.js    # 路由配置
-│   ├── App.vue         # 主组件
-│   └── style.css       # 全局样式
+│   │   └── index.js   # 路由配置
+│   ├── App.vue        # 主组件
+│   └── style.css      # 全局样式
 ├── public/
 │   └── favicon.svg
 ├── index.html
