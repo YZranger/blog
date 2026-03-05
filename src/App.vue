@@ -23,7 +23,7 @@ onMounted(() => {
       </div>
       <nav class="nav">
         <RouterLink to="/" class="nav-link">Home</RouterLink>
-        <RouterLink to="/admin" class="nav-link">Admin</RouterLink>
+        <RouterLink to="/blog" class="nav-link">Blog</RouterLink>
       </nav>
     </header>
     
@@ -32,7 +32,7 @@ onMounted(() => {
     </main>
     
     <footer class="footer">
-      <p>// Built with 💻 and ☕ by yz</p>
+      <p>// Built with <span class="emoji">💻</span> and <span class="emoji">☕</span> by yz</p>
       <p class="copyright">© 2026 <span class="typing">while(alive) { code(); }</span></p>
     </footer>
   </div>
@@ -46,8 +46,6 @@ onMounted(() => {
   --color-green-800: #00cc33;
   --color-green-700: #00ff41;
   --color-green-600: #33ff66;
-  --color-green-500: #00ff41;
-  --color-green-400: #33ff66;
   --color-pink-500: #ff0055;
 }
 
@@ -204,6 +202,10 @@ body::before {
 
 .footer p {
   margin: 0.3rem 0;
+}
+
+.emoji {
+  font-family: "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
 }
 
 .typing {

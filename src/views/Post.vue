@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getPost, addComment } from '../services/github.js'
+import { getPost } from '../services/github.js'
 import hljs from 'highlight.js'
 import 'highlight.js/styles/github-dark.css'
 
@@ -10,12 +10,10 @@ const router = useRouter()
 
 const post = ref(null)
 const loading = ref(true)
-const error = ref('')
 
 const newComment = ref({ name: '', content: '' })
 const showCommentForm = ref(false)
 const commentSuccess = ref(false)
-const submitting = ref(false)
 
 onMounted(async () => {
   post.value = await getPost(route.params.id)
@@ -28,36 +26,7 @@ onMounted(async () => {
   }, 100)
 })
 
-const submitComment = async () => {
-  if (!newComment.value.name || !newComment.value.content) return
-  
-  const token = localStorage.getItem('github_token')
-  if (!token) {
-    alert('请先在管理后台登录 GitHub 账号')
-    return
-  }
-  
-  submitting.value = true
-  const result = await addComment(
-    route.params.id,
-    newComment.value.name,
-    newComment.value.content,
-    token
-  )
-  submitting.value = false
-  
-  if (result.success) {
-    newComment.value = { name: '', content: '' }
-    showCommentForm.value = false
-    commentSuccess.value = true
-    setTimeout(() => commentSuccess.value = false, 3000)
-    post.value = await getPost(route.params.id)
-  } else {
-    alert('评论失败: ' + result.error)
-  }
-}
-
-const goBack = () => router.push('/')
+const goBack = () => router.push('/blog')
 
 const renderContent = (content) => {
   if (!content) return ''
@@ -118,6 +87,7 @@ const renderContent = (content) => {
       <div class="post-content" v-html="renderContent(post.content)"></div>
     </article>
 
+    <!-- Comments Section -->
     <section class="comments-section">
       <h2 class="comments-title">
         <span class="comment-icon">//</span> Comments ({{ post.comments?.length || 0 }})
@@ -136,31 +106,6 @@ const renderContent = (content) => {
         <p>> 暂无评论</p>
         <p class="hint">// 成为第一个评论的人！</p>
       </div>
-
-      <div v-if="commentSuccess" class="success-msg">
-        ✓ 评论已提交！
-      </div>
-
-      <button v-if="!showCommentForm" @click="showCommentForm = true" class="add-comment-btn">
-        + Add Comment
-      </button>
-
-      <form v-if="showCommentForm" class="comment-form" @submit.prevent="submitComment">
-        <div class="form-group">
-          <label>> 你的名字:</label>
-          <input v-model="newComment.name" type="text" placeholder="Name..." required class="form-input" />
-        </div>
-        <div class="form-group">
-          <label>> 留言内容:</label>
-          <textarea v-model="newComment.content" placeholder="Your message..." rows="4" required class="form-textarea"></textarea>
-        </div>
-        <div class="form-actions">
-          <button type="submit" :disabled="submitting" class="submit-btn">
-            {{ submitting ? 'Submitting...' : 'Submit' }}
-          </button>
-          <button type="button" @click="showCommentForm = false" class="cancel-btn">Cancel</button>
-        </div>
-      </form>
     </section>
   </div>
 
@@ -171,7 +116,7 @@ const renderContent = (content) => {
   <div v-else class="not-found">
     <h1>404</h1>
     <p>> 文章未找到</p>
-    <button @click="goBack">返回首页</button>
+    <button @click="goBack">返回博客</button>
   </div>
 </template>
 
@@ -231,7 +176,7 @@ const renderContent = (content) => {
 .comments-title { font-size: 1.2rem; color: var(--text-primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
 .comment-icon { color: var(--accent); }
 
-.comments-list { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1rem; }
+.comments-list { display: flex; flex-direction: column; gap: 0.8rem; }
 .comment { background: var(--bg-secondary); padding: 1rem; border-radius: 6px; border-left: 3px solid var(--border); }
 .comment-header { display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem; }
 .comment-name { color: var(--accent); }
@@ -240,52 +185,6 @@ const renderContent = (content) => {
 
 .no-comments { text-align: center; padding: 2rem; color: var(--text-dim); }
 .hint { margin-top: 0.5rem; }
-
-.success-msg { background: rgba(0, 255, 65, 0.1); color: var(--accent); padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; text-align: center; }
-
-.add-comment-btn {
-  width: 100%;
-  padding: 1rem;
-  background: transparent;
-  border: 1px dashed var(--border);
-  color: var(--text-secondary);
-  font-family: inherit;
-  cursor: pointer;
-  border-radius: 6px;
-  transition: all 0.3s;
-}
-.add-comment-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-.comment-form { margin-top: 1rem; }
-.form-group { margin-bottom: 1rem; }
-.form-group label { display: block; color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem; }
-.form-input, .form-textarea {
-  width: 100%;
-  padding: 0.8rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-.form-input:focus, .form-textarea:focus { outline: none; border-color: var(--accent); }
-.form-textarea { resize: vertical; }
-
-.form-actions { display: flex; gap: 1rem; }
-.submit-btn, .cancel-btn {
-  flex: 1;
-  padding: 0.8rem;
-  border-radius: 6px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-.submit-btn { background: var(--accent); color: var(--bg-primary); border: none; font-weight: 600; }
-.submit-btn:hover { background: var(--accent-hover); }
-.submit-btn:disabled { opacity: 0.5; }
-.cancel-btn { background: transparent; border: 1px solid var(--border); color: var(--text-secondary); }
-.cancel-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
 
 .loading { text-align: center; padding: 4rem; color: var(--text-primary); }
 .pulse { animation: pulse 1s infinite; }
