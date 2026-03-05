@@ -1,17 +1,87 @@
 # 🚀 yz's Geek Blog
 
-> 一个疯狂的程序员打造的极客风格博客
+> 一个疯狂的程序员打造的极客风格博客 ✨
 
-![Blog Preview](https://img.shields.io/badge/Made%20with-Vue.js-green?style=flat&logo=vue.js)
+![Blog](https://img.shields.io/badge/Made%20with-Vue.js-green)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 ## ✨ 特性
 
 - 💻 **极客风格** - 终端风格 UI，Matrix 绿色代码雨背景
-- ⚡ **极速体验** - 基于 Vite + Vue 3
+- ⚡ **极速体验** - 基于 Vite + Vue 3 + Tailwind CSS
 - 📱 **响应式** - 完美支持移动端
-- 🔐 **管理后台** - 只有你能发布文章
+- 🔐 **GitHub Issues 后端** - 文章和评论存储在 GitHub
 - 💬 **评论区** - 访客可留言互动
+- 🎨 **代码高亮** - 支持多种编程语言
+
+---
+
+## 🌐 访问
+
+**博客地址**: https://yzranger.github.io/blog/
+
+---
+
+## 📝 如何写文章
+
+### 方法一：通过管理后台（推荐）
+
+1. 打开博客首页 https://yzranger.github.io/blog/
+2. 点击导航栏 `Admin`
+3. 输入你的 **GitHub Token**
+4. 填写文章标题、标签、内容
+5. 点击 `> Publish`
+
+文章会自动创建为 GitHub Issue。
+
+### 方法二：直接在 GitHub 创建 Issue
+
+1. 打开 https://github.com/YZranger/blog/issues/new
+2. 填写标题
+3. 在正文写 Markdown 内容
+4. 添加标签 `article`（必须）
+5. 可添加其他标签如 `javascript`, `vue` 等
+
+---
+
+## 🔐 获取 GitHub Token
+
+1. 访问 https://github.com/settings/tokens
+2. 点击 **Generate new token (classic)**
+3. 设置 Note (如: yz-blog)
+4. 勾选 **repo** 权限
+5. 点击 **Generate**
+6. 复制生成的 Token（格式: `ghp_xxxxxxxxxxxx`）
+
+**Token 只显示一次，请妥善保存！**
+
+---
+
+## 💬 发表评论
+
+1. 打开任意文章
+2. 点击 `+ Add Comment`
+3. 需要先在 Admin 登录 GitHub Token（用于验证身份）
+4. 填写名字和留言内容
+5. 点击 Submit
+
+评论会作为 Issue 的评论显示。
+
+---
+
+## 🔧 管理
+
+- **访问地址**: `/admin`
+- **登录方式**: GitHub Token
+- **权限**: 只有 Token 对应的 GitHub 账号才能发布文章
+
+### 修改权限
+
+编辑 `src/services/github.js` 中的 `allowedUsers` 数组：
+
+```javascript
+const allowedUsers = ['YZranger', '其他用户名']
+```
 
 ---
 
@@ -29,113 +99,6 @@ pnpm dev
 
 ---
 
-## 📝 如何写文章
-
-### 方法一：通过管理后台（推荐）
-
-1. 打开博客首页
-2. 点击导航栏 `Admin`
-3. 输入管理密码：`yz123456`
-4. 填写文章标题、标签、内容
-5. 点击 `> Publish` 发布
-
-### 方法二：直接编辑 Markdown 文件
-
-打开 `src/data/posts.js`，按格式添加文章：
-
-```javascript
-{
-  id: 'unique-id',           // 唯一标识（英文）
-  title: '文章标题',          // 中文标题
-  date: '2026-03-05',       // 发布日期
-  author: 'yz',             // 作者
-  tags: ['标签1', '标签2'],   // 文章标签
-  content: `
-# 大标题
-
-正文内容...
-
-## 二级标题
-
-- 列表项 1
-- 列表项 2
-
-> 引用内容
-
-\`\`\`javascript
-// 代码块
-console.log('Hello!');
-\`\`\`
-`
-}
-```
-
-### Markdown 语法支持
-
-| 语法 | 效果 |
-|------|------|
-| `# 标题` | 一级标题 |
-| `## 标题` | 二级标题 |
-| `**粗体**` | **粗体** |
-| `*斜体*` | *斜体* |
-| `- 列表` | 列表项 |
-| `> 引用` | 引用块 |
-| `` `代码` `` | 行内代码 |
-| ```` ```javascript ```` | 代码块 |
-
----
-
-## 🔐 管理后台
-
-- **访问地址**: `/admin`
-- **默认密码**: `yz123456`
-
-### 修改密码
-
-编辑 `src/data/posts.js` 中的 `verifyAdmin` 函数：
-
-```javascript
-export function verifyAdmin(password) {
-  return password === '你的新密码'
-}
-```
-
----
-
-## 🌐 部署到 GitHub Pages
-
-### 方式一：自动部署（推荐）
-
-项目已配置 GitHub Actions，每次推送自动部署！
-
-```bash
-# 1. 创建 GitHub 仓库
-# 2. 推送代码
-git add .
-git commit -m "init blog"
-git remote add origin https://github.com/你的用户名/blog.git
-git push -u origin master
-
-# 3. 启用 GitHub Pages
-# 仓库设置 → Pages → Source: GitHub Actions
-```
-
-### 方式二：手动部署
-
-```bash
-# 构建生产版本
-pnpm build
-
-# 推送 dist 文件夹到 gh-pages 分支
-cd dist
-git init
-git add .
-git commit -m "deploy"
-git push -f https://github.com/你的用户名/blog.git master:gh-pages
-```
-
----
-
 ## 📁 目录结构
 
 ```
@@ -145,12 +108,13 @@ blog/
 │   │   ├── Home.vue      # 首页
 │   │   ├── Post.vue      # 文章详情
 │   │   └── Admin.vue     # 管理后台
+│   ├── services/
+│   │   └── github.js    # GitHub Issues API
 │   ├── router/
 │   │   └── index.js      # 路由配置
-│   ├── data/
-│   │   └── posts.js      # 文章数据
 │   ├── App.vue           # 主组件
-│   └── main.js           # 入口文件
+│   ├── main.js           # 入口文件
+│   └── style.css         # 全局样式
 ├── public/
 │   └── favicon.svg       # 网站图标
 ├── index.html
