@@ -1,60 +1,60 @@
 <script setup>
-import { posts } from '../data/posts.js'
-import { ref } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { getPosts } from '../services/github.js'
 
 const router = useRouter()
+
+const posts = ref([])
+const loading = ref(true)
 const searchQuery = ref('')
 
-const filteredPosts = ref(posts)
+onMounted(async () => {
+  posts.value = await getPosts()
+  loading.value = false
+})
 
-const searchPosts = () => {
-  if (!searchQuery.value) {
-    filteredPosts.value = posts
-    return
-  }
+const filteredPosts = computed(() => {
+  if (!searchQuery.value) return posts.value
   const query = searchQuery.value.toLowerCase()
-  filteredPosts.value = posts.filter(post => 
+  return posts.value.filter(post => 
     post.title.toLowerCase().includes(query) ||
     post.tags.some(tag => tag.toLowerCase().includes(query))
   )
-}
+})
 
 const goToPost = (id) => {
   router.push(`/post/${id}`)
-}
-
-const formatDate = (date) => {
-  return date
 }
 </script>
 
 <template>
   <div class="home">
+    <!-- Hero Section -->
     <div class="hero">
       <div class="hero-terminal">
         <div class="terminal-header">
-          <span class="terminal-dot red"></span>
-          <span class="terminal-dot yellow"></span>
-          <span class="terminal-dot green"></span>
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
           <span class="terminal-title">~/blog</span>
         </div>
         <div class="terminal-body">
-          <p><span class="prompt">$</span> <span class="typing-effect">whoami</span></p>
+          <p><span class="prompt">$</span> <span class="cmd">whoami</span></p>
           <p class="output">yz - 疯狂的程序员 🚀</p>
-          <p><span class="prompt">$</span> <span class="typing-effect">echo $MOTTO</span></p>
+          <p><span class="prompt">$</span> <span class="cmd">echo $MOTTO</span></p>
           <p class="output">"Code is poetry, bugs are features"</p>
-          <p><span class="prompt">$</span> <span class="typing-effect">cat skills.json</span></p>
-          <p class="output">[JavaScript, Python, Rust, Go, ...]</p>
+          <p><span class="prompt">$</span> <span class="cmd">cat skills.json</span></p>
+          <p class="output">[JavaScript, Python, Rust, Go, Vue.js ...]</p>
           <p><span class="prompt">$</span> <span class="blink">_</span></p>
         </div>
       </div>
     </div>
 
+    <!-- Search -->
     <div class="search-box">
       <input 
         v-model="searchQuery" 
-        @input="searchPosts"
         type="text" 
         placeholder="// 搜索文章或标签..."
         class="search-input"
@@ -62,7 +62,13 @@ const formatDate = (date) => {
       <span class="search-prompt">></span>
     </div>
 
-    <div class="posts-grid">
+    <!-- Loading -->
+    <div v-if="loading" class="loading">
+      <p>Loading<span class="pulse">...</span></p>
+    </div>
+
+    <!-- Posts Grid -->
+    <div v-else class="posts-grid">
       <article 
         v-for="(post, index) in filteredPosts" 
         :key="post.id" 
@@ -81,15 +87,13 @@ const formatDate = (date) => {
           {{ post.content.substring(0, 150).replace(/[#*`\n]/g, ' ').trim() }}...
         </p>
         <div class="post-footer">
-          <span class="author">
-            <span class="at-sign">@</span>{{ post.author }}
-          </span>
-          <span class="read-more">Read More >></span>
+          <span class="author"><span class="at">@</span>{{ post.author }}</span>
+          <span class="read-more">Read More <span class="arrow">>></span></span>
         </div>
       </article>
     </div>
 
-    <div v-if="filteredPosts.length === 0" class="no-results">
+    <div v-if="!loading && filteredPosts.length === 0" class="no-results">
       <p>> 找不到相关文章</p>
       <p class="hint">// 试试其他关键词？</p>
     </div>
@@ -97,13 +101,9 @@ const formatDate = (date) => {
 </template>
 
 <style scoped>
-.home {
-  padding-top: 1rem;
-}
+.home { padding-top: 1rem; }
 
-.hero {
-  margin-bottom: 3rem;
-}
+.hero { margin-bottom: 2rem; }
 
 .hero-terminal {
   background: var(--bg-secondary);
@@ -122,12 +122,7 @@ const formatDate = (date) => {
   border-bottom: 1px solid var(--border);
 }
 
-.terminal-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
+.dot { width: 12px; height: 12px; border-radius: 50%; }
 .red { background: #ff5f56; }
 .yellow { background: #ffbd2e; }
 .green { background: #27c93f; }
@@ -144,28 +139,12 @@ const formatDate = (date) => {
   line-height: 1.8;
 }
 
-.terminal-body p {
-  margin: 0.3rem 0;
-}
+.terminal-body p { margin: 0.3rem 0; }
 
-.prompt {
-  color: #ff0055;
-  margin-right: 8px;
-}
-
-.typing-effect {
-  color: var(--text-secondary);
-}
-
-.output {
-  color: var(--text-primary);
-  padding-left: 1rem;
-}
-
-.blink {
-  animation: blink 1s infinite;
-  color: var(--accent);
-}
+.prompt { color: #ff0055; margin-right: 8px; }
+.cmd { color: var(--text-secondary); }
+.output { color: var(--text-primary); padding-left: 1rem; }
+.blink { animation: blink 1s infinite; color: var(--accent); }
 
 .search-box {
   display: flex;
@@ -193,13 +172,12 @@ const formatDate = (date) => {
   outline: none;
 }
 
-.search-input::placeholder {
-  color: var(--text-dim);
-}
+.search-input::placeholder { color: var(--text-dim); }
+.search-prompt { color: var(--accent); }
 
-.search-prompt {
-  color: var(--accent);
-}
+.loading { text-align: center; padding: 3rem; color: var(--text-primary); }
+.pulse { animation: pulse 1s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
 .posts-grid {
   display: grid;
@@ -219,14 +197,8 @@ const formatDate = (date) => {
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .post-card:hover {
@@ -242,39 +214,14 @@ const formatDate = (date) => {
   margin-bottom: 1rem;
 }
 
-.post-date {
-  color: var(--text-dim);
-  font-size: 0.85rem;
-}
+.post-date { color: var(--text-dim); font-size: 0.85rem; }
+.post-tags { display: flex; gap: 0.5rem; }
+.tag { color: #ff0055; font-size: 0.8rem; }
 
-.post-tags {
-  display: flex;
-  gap: 0.5rem;
-}
+.post-title { color: var(--text-primary); font-size: 1.3rem; margin-bottom: 0.8rem; }
+.post-card:hover .post-title { color: var(--accent); }
 
-.tag {
-  color: #ff0055;
-  font-size: 0.8rem;
-}
-
-.post-title {
-  color: var(--text-primary);
-  font-size: 1.3rem;
-  margin-bottom: 0.8rem;
-  transition: color 0.3s;
-}
-
-.post-card:hover .post-title {
-  color: var(--accent);
-  text-shadow: 0 0 10px var(--accent);
-}
-
-.post-preview {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.6;
-  margin-bottom: 1rem;
-}
+.post-preview { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem; }
 
 .post-footer {
   display: flex;
@@ -284,44 +231,16 @@ const formatDate = (date) => {
   border-top: 1px solid var(--border);
 }
 
-.author {
-  color: var(--text-dim);
-  font-size: 0.85rem;
-}
+.author { color: var(--text-dim); font-size: 0.85rem; }
+.at { color: var(--accent); }
 
-.at-sign {
-  color: var(--accent);
-}
+.read-more { color: var(--accent); font-size: 0.85rem; transition: transform 0.3s; }
+.post-card:hover .read-more { transform: translateX(5px); }
 
-.read-more {
-  color: var(--accent);
-  font-size: 0.85rem;
-  transition: all 0.3s;
-}
-
-.post-card:hover .read-more {
-  transform: translateX(5px);
-}
-
-.no-results {
-  text-align: center;
-  padding: 3rem;
-  color: var(--text-dim);
-}
-
-.hint {
-  margin-top: 1rem;
-  color: var(--text-dim);
-}
+.no-results { text-align: center; padding: 3rem; color: var(--text-dim); }
+.hint { margin-top: 1rem; }
 
 @media (max-width: 768px) {
-  .posts-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .terminal-body {
-    font-size: 0.8rem;
-    padding: 1rem;
-  }
+  .posts-grid { grid-template-columns: 1fr; }
 }
 </style>

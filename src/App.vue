@@ -15,15 +15,15 @@ onMounted(() => {
   <div class="app">
     <header class="header">
       <div class="logo">
-        <span class="logo-bracket">&lt;</span>
-        <span class="logo-text">yz</span>
-        <span class="logo-slash">/</span>
-        <span class="logo-bracket">&gt;</span>
+        <span class="bracket">&lt;</span>
+        <span class="yz">yz</span>
+        <span class="slash">/</span>
+        <span class="bracket">&gt;</span>
         <span class="cursor" :class="{ visible: cursorVisible }">_</span>
       </div>
       <nav class="nav">
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/admin">Admin</RouterLink>
+        <RouterLink to="/" class="nav-link">Home</RouterLink>
+        <RouterLink to="/admin" class="nav-link">Admin</RouterLink>
       </nav>
     </header>
     
@@ -33,7 +33,7 @@ onMounted(() => {
     
     <footer class="footer">
       <p>// Built with 💻 and ☕ by yz</p>
-      <p>© 2026 <span class="typing">while(alive) { code(); }</span></p>
+      <p class="copyright">© 2026 <span class="typing">while(alive) { code(); }</span></p>
     </footer>
   </div>
 </template>
@@ -41,10 +41,14 @@ onMounted(() => {
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=JetBrains+Mono:wght@400;700&display=swap');
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@theme {
+  --color-green-900: #008f11;
+  --color-green-800: #00cc33;
+  --color-green-700: #00ff41;
+  --color-green-600: #33ff66;
+  --color-green-500: #00ff41;
+  --color-green-400: #33ff66;
+  --color-pink-500: #ff0055;
 }
 
 :root {
@@ -57,13 +61,18 @@ onMounted(() => {
   --accent: #00ff41;
   --accent-hover: #33ff66;
   --border: #00ff4133;
-  --font-mono: 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: var(--font-mono);
+  font-family: 'Fira Code', 'JetBrains Mono', monospace;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -98,9 +107,9 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
-  background: rgba(10, 10, 10, 0.9);
+  background: rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(10px);
   position: sticky;
   top: 0;
@@ -108,28 +117,20 @@ body::before {
 }
 
 .logo {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   font-weight: 700;
   display: flex;
   align-items: center;
 }
 
-.logo-bracket {
-  color: var(--text-dim);
-}
-
-.logo-text {
-  color: var(--text-primary);
-  text-shadow: 0 0 10px var(--text-primary);
-}
-
-.logo-slash {
-  color: #ff0055;
-}
+.bracket { color: var(--text-dim); }
+.yz { color: var(--text-primary); text-shadow: 0 0 10px var(--text-primary); }
+.slash { color: #ff0055; }
 
 .cursor {
   opacity: 0;
   color: var(--accent);
+  margin-left: 2px;
 }
 
 .cursor.visible {
@@ -144,10 +145,10 @@ body::before {
 
 .nav {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
-.nav a {
+.nav-link {
   color: var(--text-secondary);
   text-decoration: none;
   font-size: 1rem;
@@ -155,26 +156,26 @@ body::before {
   position: relative;
 }
 
-.nav a::before {
+.nav-link::before {
   content: '// ';
   opacity: 0;
   transition: opacity 0.3s;
 }
 
-.nav a:hover {
+.nav-link:hover {
   color: var(--accent);
   text-shadow: 0 0 10px var(--accent);
 }
 
-.nav a:hover::before {
+.nav-link:hover::before {
   opacity: 1;
 }
 
-.nav a.router-link-active {
+.nav-link.router-link-active {
   color: var(--accent);
 }
 
-.nav a.router-link-active::after {
+.nav-link.router-link-active::after {
   content: '';
   position: absolute;
   bottom: -4px;
@@ -187,14 +188,14 @@ body::before {
 
 .main {
   flex: 1;
-  padding: 2rem;
+  padding: 1.5rem;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
 }
 
 .footer {
-  padding: 2rem;
+  padding: 1.5rem;
   text-align: center;
   border-top: 1px solid var(--border);
   color: var(--text-dim);
